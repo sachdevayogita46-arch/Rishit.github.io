@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChessLegends - Play & Learn Chess</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jQuery (Required for chessboard.js) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Chessboard.js CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    <!-- Chess.js for move validation logic -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <style>
+        .chess-bg {
+            background-color: #161512;
+            color: #bababa;
+        }
+    </style>
+</head>
+<body class="chess-bg min-h-screen font-sans">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-[#262421] border-b border-[#383633] px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-6">
+            <h1 class="text-2xl font-bold text-white tracking-wider cursor-pointer" onclick="showPage('cover-page')">♟ ChessLegends</h1>
+            <button onclick="showPage('play-menu')" class="hover:text-white transition">Play</button>
+            <button onclick="showPage('puzzles-page')" class="hover:text-white transition">Puzzles</button>
+            <button onclick="showPage('bots-page')" class="hover:text-white transition">Bots</button>
+            <button onclick="showPage('profile-page')" class="hover:text-white transition">Profile</button>
+        </div>
+        <div id="nav-auth-buttons" class="space-x-4">
+            <button onclick="openModal('login-modal')" class="bg-[#363431] hover:bg-[#454340] text-white px-4 py-2 rounded font-semibold transition">Log In</button>
+            <button onclick="openModal('signup-modal')" class="bg-[#81b64c] hover:bg-[#709e42] text-white px-4 py-2 rounded font-semibold transition">Sign Up</button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-6xl mx-auto p-6">
+
+        <!-- 1. COVER PAGE -->
+        <section id="cover-page" class="page flex flex-col items-center justify-center text-center py-20">
+            <h2 class="text-6xl font-extrabold text-white mb-6">Play Chess Online & Solve Puzzles</h2>
+            <p class="text-xl max-w-xl mb-10 text-[#989795]">Play with friends, challenge high-rated grandmaster bots, and level up your rating just like on Chess.com.</p>
+            <div class="space-x-4">
+                <button onclick="showPage('play-menu')" class="bg-[#81b64c] hover:bg-[#709e42] text-white text-2xl font-bold px-8 py-4 rounded-lg shadow-lg transition transform hover:-translate-y-1">Play Chess</button>
+                <button onclick="showPage('bots-page')" class="bg-[#363431] hover:bg-[#454340] text-white text-2xl font-bold px-8 py-4 rounded-lg shadow-lg transition">Vs Bots</button>
+            </div>
+        </section>
+
+        <!-- 2. TIME CONTROL OPTIONS PAGE -->
+        <section id="play-menu" class="page hidden text-center py-10">
+            <h3 class="text-3xl font-bold text-white mb-8">Select Time Control</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+                <div onclick="startMatch('1 Min Bullet')" class="bg-[#262421] border border-[#383633] hover:border-[#81b64c] p-6 rounded-xl cursor-pointer transition">
+                    <h4 class="text-2xl font-bold text-white mb-2">⚡ 1 Min</h4>
+                    <p class="text-sm text-gray-400">Bullet Chess</p>
+                </div>
+                <div onclick="startMatch('2 Min Bullet')" class="bg-[#262421] border border-[#383633] hover:border-[#81b64c] p-6 rounded-xl cursor-pointer transition">
+                    <h4 class="text-2xl font-bold text-white mb-2">⚡ 2 | 1 Min</h4>
+                    <p class="text-sm text-gray-400">Bullet Chess</p>
+                </div>
+                <div onclick="startMatch('3 Min Blitz')" class="bg-[#262421] border border-[#383633] hover:border-[#81b64c] p-6 rounded-xl cursor-pointer transition">
+                    <h4 class="text-2xl font-bold text-white mb-2">🔥 3 Min</h4>
+                    <p class="text-sm text-gray-400">Blitz Chess</p>
+                </div>
+                <div onclick="startMatch('4 Min Blitz')" class="bg-[#262421] border border-[#383633] hover:border-[#81b64c] p-6 rounded-xl cursor-pointer transition">
+                    <h4 class="text-2xl font-bold text-white mb-2">🔥 4 Min</h4>
+                    <p class="text-sm text-gray-400">Blitz Chess</p>
+                </div>
+                <div onclick="startMatch('5 Min Blitz')" class="bg-[#262421] border border-[#383633] hover:border-[#81b64c] p-6 rounded-xl cursor-pointer transition">
+                    <h4 class="text-2xl font-bold text-white mb-2">⏱️ 5 Min</h4>
+                    <p class="text-sm text-gray-400">Blitz Chess</p>
+                </div>
+                <div onclick="startMatch('10 Min Rapid')" class="bg-[#262421] border border-[#383633] hover:border-[#81b64c] p-6 rounded-xl cursor-pointer transition">
+                    <h4 class="text-2xl font-bold text-white mb-2">⏳ 10 Min</h4>
+                    <p class="text-sm text-gray-400">Rapid Chess</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. LIVE GAME / BOARD PAGE -->
+        <section id="game-page" class="page hidden">
+            <div class="flex flex-col md:flex-row justify-center items-center gap-8">
+                <div>
+                    <div class="text-white text-lg font-bold mb-2 flex justify-between">
+                        <span id="opponent-name">Online Opponent</span>
+                        <span>Rating: 1500</span>
+                    </div>
+                    <!-- Chess Board Container -->
+                    <div id="board" style="width: 400px"></div>
+                    <div class="text-white text-lg font-bold mt-2 flex justify-between">
+                        <span id="player-username">User_123</span>
+                        <span id="player-rating-display">Rating: 1200</span>
+                    </div>
+                </div>
+                <div class="bg-[#262421] p-6 rounded-lg w-80 border border-[#383633]">
+                    <h3 id="game-mode-title" class="text-xl font-bold text-white mb-4">Match Active</h3>
+                    <div id="game-status" class="text-green-400 mb-4 font-semibold">Your turn (White)</div>
+                    <button onclick="resetGame()" class="w-full bg-[#81b64c] hover:bg-[#709e42] text-white font-bold py-2 rounded mb-3">New Game</button>
+                    <button onclick="showPage('play-menu')" class="w-full bg-[#363431] hover:bg-[#454340] text-white font-bold py-2 rounded">Quit Match</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. PUZZLES PAGE -->
+        <section id="puzzles-page" class="page hidden">
+            <div class="flex flex-col md:flex-row justify-center items-center gap-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-2">Chess Puzzle #4921</h3>
+                    <p class="text-sm text-gray-400 mb-4">Find the best move to win material.</p>
+                    <div id="puzzle-board" style="width: 400px"></div>
+                </div>
+                <div class="bg-[#262421] p-6 rounded-lg w-80 border border-[#383633]">
+                    <h4 class="text-xl font-bold text-white mb-2">Puzzle Trainer</h4>
+                    <p id="puzzle-message" class="text-yellow-400 mb-4">White to move and gain advantage.</p>
+                    <button onclick="loadPuzzle()" class="w-full bg-[#81b64c] hover:bg-[#709e42] text-white font-bold py-2 rounded">Next Puzzle</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. BOTS PAGE (Low to High Grandmaster Bots) -->
+        <section id="bots-page" class="page hidden">
+            <h3 class="text-3xl font-bold text-white mb-6 text-center">Play Against Grandmaster Bots</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Bot 1 -->
+                <div class="bg-[#262421] border border-[#383633] p-5 rounded-lg flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xl font-bold text-white">Hikaru (Bot)</h4>
+                        <p class="text-sm text-[#81b64c] font-semibold">Rating: 1200</p>
+                    </div>
+                    <button onclick="playBot('Hikaru', 1200)" class="bg-[#81b64c] px-4 py-2 rounded text-white font-bold hover:bg-[#709e42]">Play</button>
+                </div>
+                <!-- Bot 2 -->
+                <div class="bg-[#262421] border border-[#383633] p-5 rounded-lg flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xl font-bold text-white">Viswanathan Anand</h4>
+                        <p class="text-sm text-[#81b64c] font-semibold">Rating: 1800</p>
+                    </div>
+                    <button onclick="playBot('Viswanathan Anand', 1800)" class="bg-[#81b64c] px-4 py-2 rounded text-white font-bold hover:bg-[#709e42]">Play</button>
+                </div>
+                <!-- Bot 3 -->
+                <div class="bg-[#262421] border border-[#383633] p-5 rounded-lg flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xl font-bold text-white">Garry Kasparov</h4>
+                        <p class="text-sm text-[#81b64c] font-semibold">Rating: 2400</p>
+                    </div>
+                    <button onclick="playBot('Garry Kasparov', 2400)" class="bg-[#81b64c] px-4 py-2 rounded text-white font-bold hover:bg-[#709e42]">Play</button>
+                </div>
+                <!-- Bot 4 -->
+                <div class="bg-[#262421] border border-[#383633] p-5 rounded-lg flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xl font-bold text-white">Magnus Carlsen</h4>
+                        <p class="text-sm text-[#81b64c] font-semibold">Rating: 2882</p>
+                    </div>
+                    <button onclick="playBot('Magnus Carlsen', 2882)" class="bg-[#81b64c] px-4 py-2 rounded text-white font-bold hover:bg-[#709e42]">Play</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. PROFILE PAGE (Chess.com Style) -->
+        <section id="profile-page" class="page hidden">
+            <div class="bg-[#262421] border border-[#383633] rounded-xl p-8 max-w-3xl mx-auto flex flex-col md:flex-row items-center gap-8">
+                <div class="w-32 h-32 bg-[#363431] rounded-full flex items-center text-5xl justify-center border-4 border-[#81b64c]">👑</div>
+                <div class="text-center md:text-left flex-1">
+                    <h3 id="profile-id-display" class="text-3xl font-bold text-white mb-2">ChessMaster_99</h3>
+                    <p class="text-gray-400 text-sm mb-4">Member since: 2026 | Region: Global</p>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div class="bg-[#1e1c19] p-3 rounded border border-[#383633]">
+                            <div class="text-gray-400 text-xs">Rapid Rating</div>
+                            <div id="stat-rapid" class="text-xl font-bold text-white">1250</div>
+                        </div>
+                        <div class="bg-[#1e1c19] p-3 rounded border border-[#383633]">
+                            <div class="text-gray-400 text-xs">Blitz Rating</div>
+                            <div id="stat-blitz" class="text-xl font-bold text-white">1180</div>
+                        </div>
+                        <div class="bg-[#1e1c19] p-3 rounded border border-[#383633]">
+                            <div class="text-gray-400 text-xs">Puzzles</div>
+                            <div class="text-xl font-bold text-white">1740</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- AUTH MODALS (Login & Sign Up) -->
+    <div id="login-modal" class="hidden fixed inset-0 bg-black bg-y-70 bg-opacity-70 flex items-center justify-center">
+        <div class="bg-[#262421] border border-[#383633] p-8 rounded-lg w-96 relative">
+            <h3 class="text-2xl font-bold text-white mb-6">Log In to ChessLegends</h3>
+            <input type="text" id="login-username-input" placeholder="Username / ID" class="w-full bg-[#161512] border border-[#383633] p-3 rounded text-white mb-4">
+            <input type="password" placeholder="Password" class="w-full bg-[#161512] border border-[#383633] p-3 rounded text-white mb-6">
+            <button onclick="handleLogin()" class="w-full bg-[#81b64c] hover:bg-[#709e42] text-white font-bold py-3 rounded mb-3">Log In</button>
+            <button onclick="closeModal('login-modal')" class="w-full bg-[#363431] text-gray-300 py-2 rounded">Cancel</button>
+        </div>
+    </div>
+
+    <div id="signup-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
+        <div class="bg-[#262421] border border-[#383633] p-8 rounded-lg w-96 relative">
+            <h3 class="text-2xl font-bold text-white mb-6">Create Account</h3>
+            <input type="text" id="signup-username-input" placeholder="Choose Username / ID" class="w-full bg-[#161512] border border-[#383633] p-3 rounded text-white mb-4">
+            <input type="password" placeholder="Password" class="w-full bg-[#161512] border border-[#383633] p-3 rounded text-white mb-6">
+            <button onclick="handleSignup()" class="w-full bg-[#81b64c] hover:bg-[#709e42] text-white font-bold py-3 rounded mb-3">Sign Up</button>
+            <button onclick="closeModal('signup-modal')" class="w-full bg-[#363431] text-gray-300 py-2 rounded">Cancel</button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT GAME LOGIC -->
+    <script>
+        let board = null;
+        let game = new Chess();
+        let puzzleBoard = null;
+        let puzzleGame = new Chess();
+        
+        // Mock user session state
+        let currentUser = {
+            id: "Grandmaster_Aspire",
+            rating: 1200
+        };
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+
+            if (pageId === 'game-page' && !board) {
+                initGame();
+            }
+            if (pageId === 'puzzles-page' && !puzzleBoard) {
+                initPuzzle();
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function handleLogin() {
+            const val = document.getElementById('login-username-input').value;
+            if(val) currentUser.id = val;
+            updateUIProfile();
+            closeModal('login-modal');
+        }
+
+        function handleSignup() {
+            const val = document.getElementById('signup-username-input').value;
+            if(val) currentUser.id = val;
+            updateUIProfile();
+            closeModal('signup-modal');
+        }
+
+        function updateUIProfile() {
+            document.getElementById('profile-id-display').innerText = currentUser.id;
+            document.getElementById('player-username').innerText = currentUser.id;
+            document.getElementById('player-rating-display').innerText = "Rating: " + currentUser.rating;
+            document.getElementById('stat-rapid').innerText = currentUser.rating;
+            document.getElementById('nav-auth-buttons').innerHTML = `<span class="text-white font-semibold">👤 ${currentUser.id} (${currentUser.rating})</span>`;
+        }
+
+        // Initialize Live/Bot Match Board
+        function startMatch(mode) {
+            showPage('game-page');
+            document.getElementById('game-mode-title').innerText = mode;
+            if(!board) {
+                setTimeout(() => {
+                    board = Chessboard('board', {
+                        draggable: true,
+                        position: 'start',
+                        onDrop: handleMove
+                    });
+                }, 200);
+            } else {
+                game.reset();
+                board.start();
+            }
+        }
+
+        function playBot(botName, botRating) {
+            startMatch(`Vs ${botName} (${botRating})`);
+            document.getElementById('opponent-name').innerText = botName;
+        }
+
+        function initGame() {
+            board = Chessboard('board', {
+                draggable: true,
+                position: 'start',
+                onDrop: handleMove
+            });
+        }
+
+        function handleMove(source, target) {
+            // Check legal move via chess.js
+            let move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // auto-promote to queen for simplicity
+            });
+
+            if (move === null) return 'snapback'; // illegal move
+
+            updateGameStatus();
+
+            // Simple automatic AI reply response move after 300ms
+            window.setTimeout(makeRandomBotMove, 300);
+        }
+
+        function makeRandomBotMove() {
+            if (game.game_over()) return;
+            let moves = game.moves();
+            if (moves.length === 0) return;
+            
+            let randomMove = moves[Math.floor(Math.random() * moves.length)];
+            game.move(randomMove);
+            board.position(game.fen());
+            updateGameStatus();
+        }
+
+        function updateGameStatus() {
+            let statusHTML = '';
+            if (game.in_checkmate()) {
+                statusHTML = '<span class="text-red-500 font-bold">Game Over: Checkmate!</span>';
+            } else if (game.in_draw()) {
+                statusHTML = '<span class="text-yellow-500 font-bold">Game Over: Draw!</span>';
+            } else {
+                statusHTML = game.turn() === 'w' ? "Your turn (White)" : "Bot's turn (Black)...";
+            }
+            document.getElementById('game-status').innerHTML = statusHTML;
+        }
+
+        function resetGame() {
+            game.reset();
+            board.start();
+            document.getElementById('game-status').innerHTML = "New game started. Your turn!";
+        }
+
+        // Initialize Puzzles Board
+        function initPuzzle() {
+            puzzleBoard = Chessboard('puzzle-board', {
+                draggable: true,
+                position: 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3',
+                onDrop: handlePuzzleMove
+            });
+        }
+
+        function loadPuzzle() {
+            puzzleGame.load('r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3');
+            puzzleBoard.position('r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3');
+            document.getElementById('puzzle-message').innerText = "White to move and find the solution!";
+        }
+
+        function handlePuzzleMove(source, target) {
+            // Simple interactive puzzle evaluation validator hook
+            if(source === 'f3' && target === 'e5') {
+                document.getElementById('puzzle-message').innerHTML = '<span class="text-green-400 font-bold">Correct Move! Puzzle Solved 🎉</span>';
+                return true;
+            } else {
+                document.getElementById('puzzle-message').innerHTML = '<span class="text-red-400 font-bold">Incorrect. Try again!</span>';
+                return 'snapback';
+            }
+        }
+    </script>
+</body>
+</html>
